@@ -1,5 +1,5 @@
 {
-  "name": "basic-application",
+  "name": "cardi-find-server",
   "version": "1.0.0",
   "description": "Basic Application",
   "main": "server.js",
