@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/server.js",
     "server": "nodemon src/server.js",
-    "dev": "concurrently \"npm run server\" \"cd ../CardiFind/frontend && npm start\""
+    "dev": "concurrently \"npm run server\" \"cd ../CardiFind && npm start\""
   },
   "author": "Haim Hamiel",
   "license": "MIT",
