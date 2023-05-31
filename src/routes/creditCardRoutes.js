@@ -7,7 +7,7 @@ const {
   getCreditCard,
 } = require("../controllers/creditCardController");
 
-router.post("/", cardValidationRules, registerCreditCard);
+router.post("/", registerCreditCard);
 
 router.get("/", getCreditCards);
 router.get("/:id", getCreditCard);

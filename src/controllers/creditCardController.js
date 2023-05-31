@@ -70,12 +70,16 @@ const registerCreditCard = asyncHandler(async (req, res) => {
         return Promise.all(creditCardPromises);
       })
       .then((creditCards) => {
-        console.log(creditCards);
-        return res.status(201).json(creditCards);
+        console.log("creditCards fetched");
+        if (res) {
+          return res.status(201).json(creditCards);
+        }
       });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ message: "Server error." });
+    if (res) {
+      return res.status(500).json({ message: "Server error." });
+    }
   }
 });
 

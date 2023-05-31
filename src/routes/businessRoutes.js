@@ -7,7 +7,7 @@ const {
   getBusiness,
 } = require("../controllers/businessController");
 
-router.post("/", bussinessValidationRules, registerBusiness);
+router.post("/", registerBusiness);
 
 router.get("/", getBusinesses);
 router.get("/:id", getBusiness);

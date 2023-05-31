@@ -52,11 +52,16 @@ const registerBusiness = asyncHandler(async (req, res) => {
     if (!businesses || businesses.length === 0) {
       return res.status(404).json({ message: "Businesses not found." });
     }
-
-    return res.status(200).json(businesses);
+    console.log("Businesses fetched");
+    if(res){
+      return res.status(200).json(businesses);
+    }
+    
   } catch (error) {
     console.log(error);
+    if(res){
     return res.status(500).json({ message: "Server error." });
+    }
   }
 });
 

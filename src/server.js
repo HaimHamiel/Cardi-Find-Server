@@ -6,6 +6,8 @@ const connectDB = require("./config/db");
 const dotenv = require("dotenv");
 dotenv.config();
 const {port} = require("./config/default");
+const startCronJob = require("./config/cronJobs");
+
 
 //Connect to database
 connectDB();
@@ -21,5 +23,6 @@ const router = require("./routes");
 app.use(router);
 
 app.use(errorHandler);
+startCronJob();
 
 app.listen(port, () => console.log(`Server started on port ${port}`));
