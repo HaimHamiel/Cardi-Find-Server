@@ -7,63 +7,84 @@ const {
 const axios = require("axios");
 
 const API_URL =
-  "https://www.max.co.il/api/benefitsPlus/getDiscountsPlus?isMobile=false&page=1&loadLobby=false&v=V3.94-HF-OLD.6";
+  "https://www.max.co.il/api/benefitsPlus/getDiscountsPlus?isMobile=false&loadLobby=false&v=V3.94-HF-OLD.6";
 
 // @desc Register a new business
 // @route POST /api/businesses/
 // @access Private
 const registerBusiness = asyncHandler(async (req, res) => {
   try {
-    const response = await axios.get(API_URL);
+    let page = 1;
+    let allBusinesses = [];
 
-    if(!response?.data?.result?.discounts){
-      throw new Error("Failed to get discounts");
-    }
-    const businessesData = response.data.result.discounts;
+    while (true) {
+      const response = await axios.get(
+        `${API_URL}&page=${page}`
+      );
 
-    const businesses = [];
-    for (let element of businessesData) {
-      let description = element.description.replace(/(<([^>]+)>)/gi, "");
-      let imageUrl = element.businessLogo.url;
-      if (imageUrl === "") {
-        imageUrl = element.type.defaultImage.url;
+      if (!response?.data?.result?.discounts) {
+        throw new Error("Failed to get discounts");
       }
 
-      let filter = { businessName: element.title };
-      let updateParams = {
-        businessName: element.title,
-        image: imageUrl,
-        details: description,
-        location: element.businessAddress,
-        businessType: element.type.typeUrlName,
-        discountPercent: element.discountPercent,
-      };
-      const options = {
-        new: true,
-        upsert: true,
-      };
-      const business = await addBusiness(filter, updateParams, options);
-      if (!business || business.length === 0) {
-        return res.status(404).json({ message: "Business not found." });
+      const businessesData = response.data.result.discounts;
+
+      if (businessesData.length === 0) {
+        // No more businesses, exit the loop
+        break;
       }
-      businesses.push(business);
+
+      for (let element of businessesData) {
+        let description = element.description.replace(/(<([^>]+)>)/gi, "");
+              let imageUrl = element.businessLogo.url;
+              if (imageUrl === "") {
+                imageUrl = element.type.defaultImage.url;
+              }
+        
+              let filter = { businessName: element.title };
+              let updateParams = {
+                businessName: element.title,
+                image: imageUrl,
+                details: description,
+                location: element.businessAddress,
+                businessType: element.type.typeUrlName,
+                discountPercent: element.discountPercent,
+              };
+              const options = {
+                new: true,
+                upsert: true,
+              };
+              const business = await addBusiness(filter, updateParams, options);
+              if (!business || business.length === 0) {
+                return res.status(404).json({ message: "Business not found." });
+              }
+      }
+
+      allBusinesses.push(...businessesData); // Add fetched businesses to the array
+      
+      const desiredBusinessCount = 100; // Set your desired number of businesses
+      if (allBusinesses.length >= desiredBusinessCount) {
+        break;
+      }
+
+      page++;
     }
 
-    if (!businesses || businesses.length === 0) {
+    if (!allBusinesses || allBusinesses.length === 0) {
       return res.status(404).json({ message: "Businesses not found." });
     }
-    console.log("Businesses fetched");
-    if(res){
-      return res.status(200).json(businesses);
+
+    console.log("All businesses fetched");
+    if (res) {
+      return res.status(200).json(allBusinesses);
     }
-    
   } catch (error) {
     console.log(error);
-    if(res){
-    return res.status(500).json({ message: "Server error." });
+    if (res) {
+      return res.status(500).json({ message: "Server error." });
     }
   }
 });
+
 
 // @desc get all businesses
 // @route GET /api/businesses/
