@@ -91,16 +91,20 @@ const registerBusiness = asyncHandler(async (req, res) => {
 // @access Public
 const getBusinesses = asyncHandler(async (req, res) => {
   try {
-    const { category } = req.query;
+    const { category, page } = req.query;
+    const itemsPerPage = 20;
+    
     let query = {};
     if (category) {
       query = { businessType: category };
     }
-    const businesses = await findBusinesses(query);
+    const totalBusinesses = await findBusinesses(query).countDocuments();
+    const totalPages = Math.ceil(totalBusinesses / itemsPerPage);
+    const businesses = await findBusinesses(query).skip(itemsPerPage * (page - 1)).limit(itemsPerPage);
     if (!businesses || businesses.length === 0) {
       return res.status(404).json({ message: "Businesses not found." });
     }
-    return res.status(200).json(businesses);
+    return res.status(200).json({businesses, totalPages});
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Server error." });

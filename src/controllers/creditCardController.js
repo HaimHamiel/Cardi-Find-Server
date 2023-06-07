@@ -88,16 +88,24 @@ const registerCreditCard = asyncHandler(async (req, res) => {
 // @access Public
 const getCreditCards = asyncHandler(async (req, res) => {
   try {
-    const { category } = req.query;
+    const { category, page } = req.query;
+    const itemsPerPage = 20;
     let query = {};
     if (category) {
       query = { category: category };
     }
-    const creditCards = await findCreditCards(query);
+
+    const totalCards = await CreditCard.countDocuments(query);
+    const totalPages = Math.ceil(totalCards / itemsPerPage);
+
+    const creditCards = await findCreditCards(query)
+      .skip(itemsPerPage * (page - 1))
+      .limit(itemsPerPage);
+
     if (!creditCards || creditCards.length === 0) {
       return res.status(404).json({ message: "creditCards not found." });
     }
-    return res.status(200).json(creditCards);
+    return res.status(200).json({ creditCards, totalPages });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Server error." });
